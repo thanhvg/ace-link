@@ -648,6 +648,31 @@ call at PT."
           (push (point) candidates))))
     (nreverse candidates)))
 
+;;*`ace-link-button'
+(defun ace-link--button-collect ()
+  "Return a list of button positions."
+  (let (candidates pt)
+    (save-excursion
+      (goto-char (window-start))
+      (setq pt (point))
+      (when-let ((first-button (forward-button 0 nil nil t)))
+        (setq pt (point))
+        (push (point) candidates))
+      (while (and (forward-button 1 nil nil t)
+                  (> (point) pt))
+        (setq pt (point))
+        (push (point) candidates)))
+    (nreverse candidates)))
+
+(defun ace-link-button ()
+  "Open or go to a visible button."
+  (interactive)
+  (let ((res (avy-with ace-link-button
+               (avy-process
+                (ace-link--button-collect)
+                (avy--style-fn avy-style)))))
+    (push-button res)))
+
 ;;* `ace-link-org'
 ;;;###autoload
 (defun ace-link-org ()
@@ -1054,6 +1079,8 @@ call at PT."
   (add-to-list 'avy-styles-alist
                '(ace-link-slime-xref . pre))
   (add-to-list 'avy-styles-alist
+               '(ace-link-button . pre))
+  (add-to-list 'avy-styles-alist
                '(ace-link-slime-inspector . pre))
   (eval-after-load "xref"
     `(define-key xref--xref-buffer-mode-map ,key 'ace-link-xref))
@@ -1091,6 +1118,9 @@ call at PT."
   (eval-after-load "indium-debugger"
     `(progn
        (define-key indium-debugger-frames-mode-map ,key 'ace-link-indium-debugger-frames)))
+  (eval-after-load "dictionary"
+    `(progn
+       (define-key dictionary-mode-map ,key 'ace-link-button)))
   (eval-after-load "cider-inspector"
     `(progn
        (define-key cider-inspector-mode-map ,key 'ace-link-cider-inspector))))
