@@ -664,6 +664,7 @@ call at PT."
         (push (point) candidates)))
     (nreverse candidates)))
 
+;;;###autoload
 (defun ace-link-button ()
   "Open or go to a visible button."
   (interactive)
